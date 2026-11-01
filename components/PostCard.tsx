@@ -1,0 +1,4 @@
+import Link from 'next/link';
+import { ArrowUpRight, ArrowRight } from 'lucide-react';
+import type { Post } from '../lib/posts';
+export default function PostCard({ post, index }: { post: Post; index: number }) { return <article className="post-card"><div className={`post-art art-${index % 3}`} aria-hidden="true"><span className="art-label">FIELD NOTES / 0{index + 1}</span><div className="art-shape"/><span className="art-arrow"><ArrowUpRight size={23}/></span></div><div className="post-meta"><span>{post.category}</span><span>{post.readTime}</span></div><h3><Link href={`/blog/${post.slug}`}>{post.title}<ArrowUpRight size={20}/></Link></h3><p>{post.summary}</p><Link className="text-link" href={`/blog/${post.slug}`} aria-label={`Continue reading note ${index + 1}`}>Read note <ArrowRight size={15}/></Link></article>; }

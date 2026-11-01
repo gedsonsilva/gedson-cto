@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Footer() { return <footer className="footer"><div className="container footer-inner"><Link href="/" className="footer-name">Gedson Silva<span>Architecture grounded in engineering.</span></Link><p>Built with intention. © {new Date().getFullYear()}</p><a href="https://www.linkedin.com/in/gedsonsilva/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a></div></footer>; }

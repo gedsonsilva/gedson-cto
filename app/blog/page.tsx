@@ -1,0 +1,6 @@
+import type { Metadata } from 'next';
+import { ArrowUpRight } from 'lucide-react';
+import PostCard from '../../components/PostCard';
+import { posts } from '../../lib/posts';
+export const metadata: Metadata = { title: 'Writing', description: 'Field notes on AI architecture, software engineering, and designing reliable systems.' };
+export default function Blog() { return <main id="main"><section className="container blog-hero"><span className="eyebrow">THE NOTEBOOK</span><h1>Field notes.<br/><span>From idea to reality.</span></h1><p>Thoughts on AI, software architecture, and the craft of building<br className="desktop-break"/> systems that work beyond the whiteboard.</p><div className="blog-index"><span>ALL WRITING <span className="count">03</span></span><span>ENGINEERING, NOT HYPE.</span></div><div className="post-grid">{posts.map((post, i) => <PostCard key={post.slug} post={post} index={i}/>)}</div></section><section className="container blog-callout"><div><span className="eyebrow">BETTER IDEAS COME FROM CONVERSATION</span><h2>A different perspective?</h2><p>Challenge an idea, ask a question, or share what you’re building.</p></div><a className="button button-dark" href="/#contact">Let’s talk <ArrowUpRight size={18}/></a></section></main>; }
