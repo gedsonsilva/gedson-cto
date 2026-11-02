@@ -43,6 +43,10 @@ The API has bounded request streaming, field validation, same-origin checking, a
 
 ## Content and design
 
+For adding/editing posts and controlling their homepage placement, see the
+[agent blog editing guide](AGENTS.md). It includes the content schema, an example,
+current limitations, and a publishing checklist.
+
 - `app/page.tsx`: homepage, experience, contact section.
 - `lib/posts.ts`: blog content and metadata; add a unique slug and sections to publish a post.
 - `app/blog/[slug]/page.tsx`: article rendering and metadata.
