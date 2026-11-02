@@ -28,6 +28,8 @@ it.each([1440, 375])('home-browser: usable page, keyboard skip and navigation at
     await page.keyboard.press('Enter');
     expect(await page.evaluate(() => location.hash)).toBe('#main');
     expect(await page.locator('#main').count()).toBe(1);
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => !!document.activeElement?.closest('main'))).toBe(true);
     expect(await page.locator('h1').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(32);
     await page.locator('#name').fill('Browser Visitor');
     await page.locator('#email').fill('visitor@example.com');

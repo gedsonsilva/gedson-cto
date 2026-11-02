@@ -35,10 +35,22 @@ it('blog-list: lists unique navigable articles', () => {
   for (const post of posts) expect(screen.getByRole('link', { name: new RegExp(post.title) })).toHaveAttribute('href', `/blog/${post.slug}`);
 });
 it('blog-list: every article has substantial readable body and return navigation', async () => {
+  const content = {
+    'ai-is-a-system-not-a-model': ['Start with the decision, not the model', 'Keep deterministic rules in deterministic code.'],
+    'architecture-that-survives-delivery': ['Record the trade-off while it is fresh', 'Build a thin vertical slice through the riskiest part of the design.'],
+    'trust-is-an-engineering-requirement': ['Give human oversight a real interface', 'Auditability and privacy need to be designed together.'],
+  };
+  expect(posts.map(p => p.slug).sort()).toEqual(Object.keys(content).sort());
   for (const post of posts) {
     const { unmount } = render(await Article({ params: Promise.resolve({ slug: post.slug }) }));
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(post.title);
     expect(document.querySelector('article')!.textContent!.length).toBeGreaterThan(1800);
+    const [heading, passage] = content[post.slug as keyof typeof content];
+    expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+    expect(document.querySelector('.article-body')).toHaveTextContent(passage);
+    for (const [slug, [otherHeading]] of Object.entries(content)) {
+      if (slug !== post.slug) expect(screen.queryByRole('heading', { name: otherHeading })).not.toBeInTheDocument();
+    }
     expect(screen.getByRole('link', { name: /all writing|back to/i })).toHaveAttribute('href', '/blog');
     unmount();
   }
