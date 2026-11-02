@@ -6,16 +6,16 @@ A responsive, engineer-first portfolio built with Next.js App Router, React, Typ
 
 Requires Node.js 20.9+ (Node.js 24 recommended).
 
-From the repository root, install the shared npm workspace dependencies, then work inside the website folder:
+The website is standalone: dependencies, lockfile, tests, configuration, and generated files all belong in this folder. From the repository root:
 
 ```sh
-npm ci
 cd website
+npm ci
 cp .env.example .env.local
 npm run dev
 ```
 
-All paths and subsequent commands in this guide are relative to `website/` unless noted. Dependencies and the lockfile are managed at the repository root; there is no separate website lockfile.
+All paths and subsequent commands in this guide are relative to `website/` unless noted. You can copy this folder outside the repository and use the same commands without any parent-level npm files.
 
 Open http://localhost:3000. For production: `npm run build && npm start`.
 
@@ -49,10 +49,11 @@ npx playwright install chromium  # browser for desktop/mobile acceptance checks
 npm test          # permanent acceptance suite, JUnit in test-results/website.xml
 npm run build    # production compilation and TypeScript validation
 npm run typecheck
+python3 tests/test_isolation.py  # clean-copy install, suite/build, typecheck, and containment
 ```
 
 Tests cover the homepage, article links/content and unknown routes, fixed-recipient delivery through a mocked provider, malformed/oversized inputs, unavailable email configuration, provider/network failures, and form pending/success/retry states. Live inbox delivery needs the private setup above and is not claimed by mocked tests.
 
 ## Deployment
 
-Deploy to a Node-capable Next.js host (for example Vercel or a Node.js server), configure the private environment variables, then build. Use the workspace installation and hosting commands in the [repository guide](../README.md); the website application directory is now `website/`, with a shared lockfile at the repository root. This is not a static-export-only site: `/api/contact` requires a server runtime. Use HTTPS, configure edge abuse protection, and run the real email smoke test before launch. Create a Git remote for backup and deployment; this repository was initialized locally and no remote is configured.
+Deploy to a Node-capable Next.js host (for example Vercel or a Node.js server), configure the private environment variables, then build. Set the hosting project root to `website/`, install with `npm ci`, build with `npm run build`, and start with `npm start` (or the host's Next.js adapter). The lockfile is in this folder; no repository-root npm commands or files are required. This is not a static-export-only site: `/api/contact` requires a server runtime. Use HTTPS, configure edge abuse protection, and run the real email smoke test before launch. Create a Git remote for backup and deployment; this repository was initialized locally and no remote is configured.

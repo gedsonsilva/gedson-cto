@@ -1,10 +1,1 @@
-node_modules/
-.next/
-out/
-coverage/
-test-results/
 .junior/
-.env*
-!.env.example
-*.tsbuildinfo
-next-env.d.ts
