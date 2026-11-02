@@ -40,6 +40,7 @@ Profile details are drawn from `Profile.pdf`; AI positioning reflects the direct
 ## Verification
 
 ```sh
+npx playwright install chromium  # browser for desktop/mobile acceptance checks
 npm test          # permanent acceptance suite, JUnit in test-results/website.xml
 npm run build    # production compilation and TypeScript validation
 npm run typecheck

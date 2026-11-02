@@ -63,6 +63,8 @@ describe('contact delivery', () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
     const [url, options] = fetcher.mock.calls[0];
     expect(url).toBe('https://api.resend.com/emails');
+    expect(options.method).toBe('POST');
+    expect(options.headers['Content-Type']).toBe('application/json');
     expect(options.headers.Authorization).toBe('Bearer secret-test-key');
     const payload = JSON.parse(options.body);
     expect(payload.to).toEqual(['gedsonmsilva@gmail.com']);
@@ -109,6 +111,52 @@ describe('contact delivery', () => {
     expect(await response.text()).not.toContain('secret-test-key');
   });
 });
+describe('email-boundaries and integrated submission', () => {
+  beforeEach(() => {
+    vi.stubEnv('RESEND_API_KEY', 'test-key');
+    vi.stubEnv('CONTACT_FROM_EMAIL', 'hello@example.com');
+    vi.stubEnv('CONTACT_TO_EMAIL', 'owner@example.com');
+  });
+  const emailAt = (length: number) => `${'a'.repeat(60)}@${'b'.repeat(60)}.${'c'.repeat(60)}.${'d'.repeat(length - 187)}.com`;
+  it.each([
+    { ...valid, message: 'x'.repeat(10) },
+    { ...valid, message: 'x'.repeat(5000) },
+    { ...valid, name: 'n'.repeat(100) },
+    { ...valid, email: emailAt(254) },
+  ])('email-boundaries: accepts valid boundary %j', async input => {
+    const provider = vi.fn().mockResolvedValue(new Response('{}', { status: 200 })); vi.stubGlobal('fetch', provider);
+    expect((await POST(req(input))).status).toBe(200);
+    expect(provider).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    { ...valid, message: 'x'.repeat(9) }, { ...valid, message: ' '.repeat(20) },
+    { ...valid, name: '   ' }, { ...valid, email: emailAt(255) },
+    { email: valid.email, message: valid.message }, { name: valid.name, message: valid.message },
+    { name: valid.name, email: valid.email }, { ...valid, name: 42 },
+    { ...valid, email: ['ada@example.com'] }, { ...valid, message: {} },
+  ])('email-boundaries: rejects invalid boundary %j without delivery', async input => {
+    const provider = vi.fn(); vi.stubGlobal('fetch', provider);
+    expect((await POST(req(input))).status).toBe(400);
+    expect(provider).not.toHaveBeenCalled();
+  });
+  it('email-unavailable: missing sender prevents delivery', async () => {
+    vi.stubEnv('CONTACT_FROM_EMAIL', ''); const provider = vi.fn(); vi.stubGlobal('fetch', provider);
+    expect((await POST(req(valid))).status).toBe(503); expect(provider).not.toHaveBeenCalled();
+  });
+  it('form-integration: component request reaches real handler and provider', async () => {
+    const provider = vi.fn().mockResolvedValue(new Response('{"id":"accepted"}', { status: 200 }));
+    vi.stubGlobal('fetch', vi.fn((url, options) => {
+      if (url === '/api/contact') return POST(new Request('https://gedson.example/api/contact', options));
+      return provider(url, options);
+    }));
+    render(<ContactForm />); fill(); fireEvent.click(screen.getByRole('button', { name: /send message/i }));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(/sent/));
+    expect(provider).toHaveBeenCalledTimes(1);
+    expect(provider.mock.calls[0][1].method).toBe('POST');
+    expect(JSON.parse(provider.mock.calls[0][1].body)).toMatchObject({ to: ['owner@example.com'], reply_to: valid.email });
+    expect(JSON.parse(provider.mock.calls[0][1].body).text).toContain(valid.message);
+  });
+});
 function fill() {
   fireEvent.change(screen.getByLabelText(/^name/i), { target: { value: valid.name } });
   fireEvent.change(screen.getByLabelText(/^email/i), { target: { value: valid.email } });
@@ -122,6 +170,8 @@ it('form-success: posts data, disables pending, announces acceptance and resets'
   expect(screen.getByRole('button')).toBeDisabled();
   expect(JSON.parse(fetcher.mock.calls[0][1].body)).toMatchObject(valid);
   expect(fetcher.mock.calls[0][0]).toBe('/api/contact');
+  expect(fetcher.mock.calls[0][1].method).toBe('POST');
+  expect(fetcher.mock.calls[0][1].headers['Content-Type']).toBe('application/json');
   resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }));
   await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(/sent|thank/i));
   expect(screen.getByLabelText(/^message/i)).toHaveValue('');
