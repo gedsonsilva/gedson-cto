@@ -10,10 +10,19 @@ The website is standalone: dependencies, lockfile, tests, configuration, and gen
 
 ```sh
 cd website
-npm ci
+make help
+make install
+# Optional: configure email delivery (not needed to view the website)
 cp .env.example .env.local
-npm run dev
+make dev
 ```
+
+The Makefile requires GNU make and stays inside `website/`. `make` defaults to help.
+Use `make run` as an alias for `make dev`, or `make dev PORT=3001` to choose a different port.
+Stop the server with **Ctrl+C**. Other commands: `make test`, `make typecheck`,
+`make build`, and `make start` (after building). From the repository root you can
+also use `make -C website help` or `make -C website dev`.
+Without make, the equivalent startup commands remain `npm ci` and `npm run dev`.
 
 All paths and subsequent commands in this guide are relative to `website/` unless noted. You can copy this folder outside the repository and use the same commands without any parent-level npm files.
 
